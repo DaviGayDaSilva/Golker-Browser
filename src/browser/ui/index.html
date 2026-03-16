@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golker Browser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4285f4;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --border: #dadce0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .toolbar-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+            font-size: 18px;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--light);
+        }
+
+        .address-bar {
+            flex: 1;
+            max-width: 600px;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .address-bar:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .ai-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .ai-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: var(--dark);
+            padding: 8px 16px 0;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            background: #3c4043;
+            color: #9aa0a6;
+            padding: 10px 16px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            min-width: 120px;
+            max-width: 200px;
+            transition: background 0.2s;
+        }
+
+        .tab:hover {
+            background: #5f6368;
+        }
+
+        .tab.active {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .tab-close {
+            margin-left: auto;
+            opacity: 0.6;
+            font-size: 16px;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Browser View */
+        .browser-view {
+            flex: 1;
+            background: white;
+            position: relative;
+        }
+
+        .browser-view iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* AI Sidebar */
+        .ai-sidebar {
+            width: 380px;
+            background: white;
+            border-left: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+        }
+
+        .ai-sidebar.open {
+            display: flex;
+        }
+
+        .ai-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .ai-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .ai-subtitle {
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .ai-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ai-message {
+            padding: 12px 16px;
+            border-radius: 16px;
+            max-width: 90%;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .ai-message.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message.bot {
+            background: #f1f3f4;
+            color: var(--dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .ai-input-area {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .ai-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .ai-input:focus {
+            border-color: var(--primary);
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ai-action-btn {
+            background: #f1f3f4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .ai-action-btn:hover {
+            background: #e8eaed;
+        }
+
+        /* Memory Indicator */
+        .memory-indicator {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .memory-dot {
+            width: 8px;
+            height: 8px;
+            background: #34a853;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="toolbar-btn" title="Voltar">←</button>
+        <button class="toolbar-btn" title="Avançar">→</button>
+        <button class="toolbar-btn" title="Recarregar">↻</button>
+        <button class="toolbar-btn" title="Home">🏠</button>
+        
+        <input type="text" class="address-bar" id="addressBar" placeholder="Digite a URL ou pesquise...">
+        
+        <button class="ai-btn" id="aiToggle">
+            <span>🤖</span> IA
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container" id="tabsContainer">
+        <div class="tab active" data-tab="1">
+            <span>Nova aba</span>
+            <span class="tab-close">×</span>
+        </div>
+        <button class="tab" style="background: transparent; color: #9aa0a6; min-width: auto;" id="newTab">+</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Browser View -->
+        <div class="browser-view" id="browserView">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center;">
+                <h1 style="font-size: 48px; margin-bottom: 20px;">🌐</h1>
+                <h2 style="color: #5f6368; margin-bottom: 16px;">Golker Browser</h2>
+                <p style="color: #9aa0a6; max-width: 400px; line-height: 1.6;">
+                    O navegador mais leve do mundo com IA integrada.<br>
+                    Digite uma URL ou pesquise abaixo.
+                </p>
+                <div style="margin-top: 30px; width: 100%; max-width: 500px;">
+                    <input type="text" class="address-bar" style="width: 100%;" id="homeSearch" placeholder="Pesquisar ou digite URL...">
+                </div>
+                <div style="margin-top: 20px; color: #5f6368; font-size: 12px;">
+                    <span>💾 <span id="memoryUsage">0</span> MB | 🚀 Otimizado para performance</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Sidebar -->
+        <div class="ai-sidebar" id="aiSidebar">
+            <div class="ai-header">
+                <div class="ai-avatar">🤖</div>
+                <div>
+                    <div class="ai-title">Golker AI</div>
+                    <div class="ai-subtitle">LLaMA 3 • 100% Local</div>
+                </div>
+            </div>
+            
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message bot">
+                    Olá! Sou o assistente de IA do Golker Browser. 
+                    Posso ajudar a resumir páginas, traduzir textos, responder perguntas e muito mais.
+                    Como posso ajudar?
+                </div>
+            </div>
+            
+            <div class="ai-input-area">
+                <textarea class="ai-input" id="aiInput" placeholder="Digite sua mensagem..." rows="2"></textarea>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="aiQuickAction('resumir')">📝 Resumir Página</button>
+                    <button class="quick-btn" onclick="aiQuickAction('traduzir')">🌍 Traduzir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Indicator -->
+    <div class="memory-indicator">
+        <span class="memory-dot"></span>
+        <span><span id="ramUsage">50</span> MB</span>
+    </div>
+
+    <script>
+        // Elementos DOM
+        const aiToggle = document.getElementById('aiToggle');
+        const aiSidebar = document.getElementById('aiSidebar');
+        const aiInput = document.getElementById('aiInput');
+        const aiMessages = document.getElementById('aiMessages');
+        const addressBar = document.getElementById('addressBar');
+        const homeSearch = document.getElementById('homeSearch');
+
+        // Toggle AI Sidebar
+        aiToggle.addEventListener('click', () => {
+            aiSidebar.classList.toggle('open');
+        });
+
+        // Enviar mensagem para IA
+        aiInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                await sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = aiInput.value.trim();
+            if (!message) return;
+
+            // Adicionar mensagem do usuário
+            addMessage(message, 'user');
+            aiInput.value = '';
+
+            // Simular resposta da IA (em produção, usaria LLaMA local)
+            addMessage('Processando sua solicitação...', 'bot');
+            
+            // Aqui integraria com o modelo LLaMA local
+            try {
+                const response = await window.golker.ai.query(message);
+                // Remover mensagem "processando" e adicionar resposta real
+                aiMessages.lastElementChild.remove();
+                addMessage(response.response || 'Resposta da IA: ' + message, 'bot');
+            } catch (err) {
+                aiMessages.lastElementChild.remove();
+                addMessage('Desculpe, houve um erro ao processar sua solicitação.', 'bot');
+            }
+        }
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `ai-message ${sender}`;
+            div.textContent = text;
+            aiMessages.appendChild(div);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }
+
+        // Ações rápidas
+        async function aiQuickAction(action) {
+            if (action === 'resumir') {
+                addMessage('Por favor, resuma esta página para mim.', 'user');
+                addMessage('Entendido! Vou resumir o conteúdo da página atual. (Funcionalidade em desenvolvimento)', 'bot');
+            } else if (action === 'traduzir') {
+                addMessage('Traduza esta página para português.', 'user');
+                addMessage('Entendido! Vou traduzir o conteúdo para português. (Funcionalidade em desenvolvimento)', 'bot');
+            }
+        }
+
+        // Navegação
+        addressBar.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigate(addressBar.value);
+            }
+        });
+
+        homeSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigate(homeSearch.value);
+            }
+        });
+
+        function navigate(url) {
+            let finalUrl = url;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                finalUrl = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+            }
+            
+            // Simular navegação
+            const browserView = document.getElementById('browserView');
+            browserView.innerHTML = `<iframe src="${finalUrl}" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>`;
+            
+            addressBar.value = finalUrl;
+        }
+
+        // Atualizar uso de memória
+        function updateMemory() {
+            if (window.golker) {
+                window.golker.memory.getStats().then(stats => {
+                    const mb = Math.round(stats.heapUsed / 1024 / 1024);
+                    document.getElementById('ramUsage').textContent = mb;
+                    document.getElementById('memoryUsage').textContent = mb;
+                }).catch(() => {
+                    // Fallback para demo
+                    const baseMem = 50;
+                    const random = Math.floor(Math.random() * 10);
+                    document.getElementById('ramUsage').textContent = baseMem + random;
+                    document.getElementById('memoryUsage').textContent = baseMem + random;
+                });
+            }
+        }
+
+        // Atualizar a cada 5 segundos
+        setInterval(updateMemory, 5000);
+        updateMemory();
+
+        console.log('Golker Browser UI carregado');
+    </script>
+</body>
+</html>

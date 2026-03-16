@@ -1,0 +1,64 @@
+{
+  "name": "golker-browser",
+  "version": "1.0.0",
+  "description": "O navegador mais leve e inteligente do mundo com IA integrada",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:deb": "electron-builder --linux deb",
+    "build:appimage": "electron-builder --linux AppImage",
+    "build:apk": "electron-builder --android apk",
+    "build:all": "electron-builder --linux deb --linux AppImage --android apk"
+  },
+  "author": "Golker Team",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "electron-log": "^5.0.0",
+    "llama-node": "^0.0.1",
+    "express": "^4.18.2"
+  },
+  "build": {
+    "appId": "com.golker.browser",
+    "productName": "Golker Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "category": "Network",
+      "icon": "resources/icons"
+    },
+    "android": {
+      "target": [
+        "apk"
+      ],
+      "icon": "resources/icons",
+      "packageName": "com.golker.browser"
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libdrm2",
+        "libgbm1",
+        "libasound2"
+      ]
+    },
+    "appimage": {
+      "baseVersion": "2.23.0"
+    }
+  }
+}
