@@ -11,16 +11,22 @@
     "build:apk": "electron-builder --android apk",
     "build:all": "electron-builder --linux deb --linux AppImage --android apk"
   },
-  "author": "Golker Team",
+  "author": {
+    "name": "Golker Team",
+    "email": "hello@golker.dev"
+  },
   "license": "GPL-3.0",
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
     "electron-log": "^5.0.0",
-    "llama-node": "^0.0.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "llama-node": "^0.0.1"
   },
   "build": {
     "appId": "com.golker.browser",
@@ -33,32 +39,11 @@
         "deb",
         "AppImage"
       ],
-      "category": "Network",
-      "icon": "resources/icons"
+      "category": "Network"
     },
     "android": {
-      "target": [
-        "apk"
-      ],
-      "icon": "resources/icons",
+      "target": "apk",
       "packageName": "com.golker.browser"
-    },
-    "deb": {
-      "depends": [
-        "libgtk-3-0",
-        "libnotify4",
-        "libnss3",
-        "libxss1",
-        "libxtst6",
-        "xdg-utils",
-        "libatspi2.0-0",
-        "libdrm2",
-        "libgbm1",
-        "libasound2"
-      ]
-    },
-    "appimage": {
-      "baseVersion": "2.23.0"
     }
   }
 }

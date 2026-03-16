@@ -1,0 +1,9 @@
+{
+  "appId": "com.golker.browser",
+  "appName": "Golker Browser",
+  "webDir": "src/browser/ui",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
